@@ -15,21 +15,67 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+    
+    <div id="listadoUsuario">
+      <h1>Listado de Usuarios</h1>
+      <ul id="usuarios"></ul>
+    </div>
+
+    <div id="divFormulario">
+      <p>Nickname: <input id="inputName" type="text" name="nickname"></p>
+      <p><button id="boton">Enviar</button></p>
+      <div>
+        <p id="errores"></p>
+      </div>
+    </div>
+
+    <div id="divChat">
+      <ul id="messages"></ul>
+      <form action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+    </div> 
+
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
         var socket = io();
+        $('#divChat').hide();
+        
+        // NICKNAME
+        $('#boton').click(function(){
+          socket.emit('new user', $('#inputName').val(), function(data){
+            if (data){
+              // Se ha creado un nuevo usuario
+              $('#divFormulario').hide();
+              $('#divChat').show();
+            }else{
+              // Ya existe el usuario
+              $('#errores').html("Este nombre ya existe.");
+            }
+          });
+          $('#inputName').val('');
+          return false;
+        });
+
+        // Recibe el listado de usuarios y genera el listado de usuarios conectados
+        socket.on('listado usuarios', function(lista){
+          $('#usuarios');
+          for (var n = 0; n < lista.length; n++){
+            $('#usuarios').append($('<li>').text(lista[n]));
+          }
+        });
+
+
+        // MENSAJES
         $('form').submit(function(){
-          socket.emit('chat message', $('#m').val());
+          socket.emit('new message', $('#m').val());
           $('#m').val('');
           return false;
         });
-        socket.on('chat message', function(msg){
+
+        socket.on('new message', function(msg){
           $('#messages').append($('<li>').text(msg));
           window.scrollTo(0, document.body.scrollHeight);
         });
