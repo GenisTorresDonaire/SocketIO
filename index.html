@@ -43,7 +43,7 @@
         var socket = io();
         $('#divChat').hide();
         
-        // NICKNAME
+        // Funcion que se encaga de obtener el nickname del input y enviarlo.
         $('#boton').click(function(){
           socket.emit('new user', $('#inputName').val(), function(data){
             if (data){
@@ -61,22 +61,41 @@
 
         // Recibe el listado de usuarios y genera el listado de usuarios conectados
         socket.on('listado usuarios', function(lista){
-          $('#usuarios');
+          // Eliminamos el lista
+          $('#usuarios').empty();
+          // Cargamos de nuevo el listado con los usuarios actualmente conectados.
           for (var n = 0; n < lista.length; n++){
             $('#usuarios').append($('<li>').text(lista[n]));
           }
         });
 
-
-        // MENSAJES
+        // Funcion que se encarga de obtener el valor del input del mensaje, y enviarlo por el socket de new message.
         $('form').submit(function(){
+          // enviando el mensaje
           socket.emit('new message', $('#m').val());
+          // ahora limpiamos el input
           $('#m').val('');
           return false;
         });
 
+        // Funcion que se encarga de obtener los mensajes desde el servidor siempre que haya uno nuevos
         socket.on('new message', function(msg){
-          $('#messages').append($('<li>').text(msg));
+          // preparacion del mensaje en un li para ser introducido por jquery en el chat.
+          $('#messages').append("<li><b>" + msg.usuario + "</b>" +": " + msg.mensaje + "</li>");
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Funcion de obtencion de usuarios que se han desconectado o perdido la conexion.
+        socket.on('usuario desconectado', function(data){
+          // Preparacion del mensaje de logout del usuario una vez se ha desconectado para mostrar a los demas usuarios.
+          $('#messages').append($('<li style="background-color: red">').text(data + " ha salido de la sala." ));
+          window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Funcion nuevo usuario, que se encarga de mostrar por el chat los nuevos usuarios que se han conectado.
+        socket.on('nuevo usuario', function(data){
+          // prepracion del mensaje de que ha entrado en la sala.
+          $('#messages').append($('<li style="background-color: green">').text(data + " ha entrado en la sala." ));
           window.scrollTo(0, document.body.scrollHeight);
         });
       });
