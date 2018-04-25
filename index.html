@@ -2,42 +2,132 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      body { font: 13px Helvetica, Arial;  }
+      /*form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form { background: #000; padding: 3px; position: relative; bottom: 0; width: 100%; }
       form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      */
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
+      /*#messages li:nth-child(odd) { background: #eee; }*/
       #messages { margin-bottom: 40px }
+
+      .styleListadoUsuario{
+        background-color: #4166f7; 
+        height: 500px; 
+        text-align: center;
+        border-radius: 10px;
+      }
+
+      .styleDivFormulario{
+        background-color: grey; 
+        height: 500px; 
+        text-align: center; 
+        line-height: 50%;
+        border-radius: 10px;
+      }
+
+      .styleDivChat{
+        background-color: #6d89f7; 
+        height: 500px;  
+        line-height: 50%;
+        border-radius: 5px;
+      }
+
+      .styleInputName{
+        height: 80px; 
+        width: 60%; 
+        font-size: 30px; 
+        text-align: center;
+      }
+
+      .styleH3{
+        background-color: white;
+        font-size: 40px;
+        text-align: center;
+      }
+
+      #messages{
+        height: 500px; 
+      }
+
+      #boton{
+        height: 70px;
+        width: 250px;
+      }
+
+      .divContenedorMensajes{
+        height: 460px;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-top: 20px;
+      }
+
+      .divInputMensaje{
+        height: 40px;
+        bottom: 0;
+        padding-top: 3px;
+        border-radius: 10px;
+      }
+
+      .inputEnviar{
+        border: 0; padding: 10px; width: 90%; margin-right: .5%; margin-left: 3px; border-radius: 2px;
+      }
+
+      .botonEnviar{
+        width: 9%; background: #4166f7; border: none; padding: 12px; border-radius: 10px; color: white;
+      }
+
     </style>
   </head>
   <body>
     
-    <div id="listadoUsuario">
-      <h1>Listado de Usuarios</h1>
-      <ul id="usuarios"></ul>
-    </div>
+    <div class="container container-fluid py-5">
+      <div class="row">
+        <div class="col-2">
+          <h3 class="styleH3">Usuarios</h3>
+          <div id="listadoUsuario" class="styleListadoUsuario"> 
+            <ul style="list-style: none; font-size: 20px;" id="usuarios"></ul>
+          </div>
+        </div>
 
-    <div id="divFormulario">
-      <p>Nickname: <input id="inputName" type="text" name="nickname"></p>
-      <p><button id="boton">Enviar</button></p>
-      <div>
-        <p id="errores"></p>
+        <div class="col-10">
+          <h3 class="styleH3">Bienvenido al Chat!!</h3>
+            <div id="divFormulario" class="styleDivFormulario">
+              <br><br>
+              <h2>Nickname</h2>
+              <hr>
+              <h5>Elige tu nombre del chat, no puedes tener el mismo nickname que otro.</h5>
+              <br>
+              <input class="styleInputName" id="inputName" type="text" name="nickname">
+              <br><br>
+              <button id="boton" class="btn btn-danger">Enviar</button>
+              <div>
+                <p id="errores"></p>
+              </div>
+            </div>
+
+            <div id="divChat" class="styleDivChat">             
+              <div class="divContenedorMensajes">
+                <ul id="messages"></ul>
+              </div>
+
+              <div class="divInputMensaje">
+                <input id="m" class="inputEnviar" autocomplete="off" /><button id="botonEnviarMensaje" class="botonEnviar">Send</button>
+              </div>
+            </div> 
+        </div>
       </div>
     </div>
 
-    <div id="divChat">
-      <ul id="messages"></ul>
-      <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-      </form>
-    </div> 
-
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    
     <script>
       $(function () {
         var socket = io();
@@ -52,11 +142,11 @@
               $('#divChat').show();
             }else{
               // Ya existe el usuario
-              $('#errores').html("Este nombre ya existe.");
+              alert("Este nombre ya existe");
             }
           });
           $('#inputName').val('');
-          return false;
+          return false;          
         });
 
         // Recibe el listado de usuarios y genera el listado de usuarios conectados
@@ -65,12 +155,12 @@
           $('#usuarios').empty();
           // Cargamos de nuevo el listado con los usuarios actualmente conectados.
           for (var n = 0; n < lista.length; n++){
-            $('#usuarios').append($('<li>').text(lista[n]));
+            $('#usuarios').append($('<li style="color: white;">').text(lista[n]));
           }
         });
 
         // Funcion que se encarga de obtener el valor del input del mensaje, y enviarlo por el socket de new message.
-        $('form').submit(function(){
+        $('#botonEnviarMensaje').click(function(){
           // enviando el mensaje
           socket.emit('new message', $('#m').val());
           // ahora limpiamos el input
@@ -88,14 +178,14 @@
         // Funcion de obtencion de usuarios que se han desconectado o perdido la conexion.
         socket.on('usuario desconectado', function(data){
           // Preparacion del mensaje de logout del usuario una vez se ha desconectado para mostrar a los demas usuarios.
-          $('#messages').append($('<li style="background-color: red">').text(data + " ha salido de la sala." ));
+          $('#messages').append($('<li style="background-color: rgba(255,0,0,0.5); border-radius: 10px; bottom: 2px;">').text(data + " ha salido de la sala." ));
           window.scrollTo(0, document.body.scrollHeight);
         });
 
         // Funcion nuevo usuario, que se encarga de mostrar por el chat los nuevos usuarios que se han conectado.
         socket.on('nuevo usuario', function(data){
           // prepracion del mensaje de que ha entrado en la sala.
-          $('#messages').append($('<li style="background-color: green">').text(data + " ha entrado en la sala." ));
+          $('#messages').append($('<li style="background-color: rgba(0,255,0,0.5); border-radius: 10px; bottom: 2px;">').text(data + " ha entrado en la sala." ));
           window.scrollTo(0, document.body.scrollHeight);
         });
       });
